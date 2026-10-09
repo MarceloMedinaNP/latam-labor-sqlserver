@@ -1,0 +1,26 @@
+# Dos contenedores:
+#   db  : SQL Server 2022 (edición Express)
+#   app : Python, donde se trabaja; comparte la red con db (localhost:1433)
+# La carpeta del proyecto se monta en los dos, en la misma ruta, para que
+# BULK INSERT (que corre dentro de db) pueda leer los CSV de data/raw.
+
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: "Express"
+      # Contraseña solo para este entorno de práctica, que no se expone afuera
+      MSSQL_SA_PASSWORD: "Practica_SQL_2026!"
+    volumes:
+      - ../..:/workspaces:cached
+    restart: unless-stopped
+
+  app:
+    image: mcr.microsoft.com/devcontainers/python:3.11
+    volumes:
+      - ../..:/workspaces:cached
+    command: sleep infinity
+    network_mode: service:db
+    depends_on:
+      - db

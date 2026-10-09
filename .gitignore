@@ -1,0 +1,4 @@
+# Datos: se generan con fetch_worldbank.py del repositorio original
+*.csv
+data/
+__pycache__/

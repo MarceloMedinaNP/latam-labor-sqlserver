@@ -1,0 +1,12 @@
+{
+  "name": "latam-labor-sqlserver",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+  "postCreateCommand": "pip install --user -r requirements.txt",
+  "customizations": {
+    "vscode": {
+      "extensions": ["ms-mssql.mssql"]
+    }
+  }
+}
