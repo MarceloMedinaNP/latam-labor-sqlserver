@@ -59,6 +59,17 @@ def mostrar(cursor: pymssql.Cursor) -> None:
             break
 
 
+def mensaje_legible(e: pymssql.Error) -> str:
+    """Convierte el error de pymssql en 'código: mensaje', con acentos legibles."""
+    if e.args and isinstance(e.args[0], tuple) and len(e.args[0]) == 2:
+        codigo, texto = e.args[0]
+        if isinstance(texto, bytes):
+            texto = texto.decode("utf-8", errors="replace")
+        texto = texto.split("DB-Lib error message")[0].strip()
+        return f"[{codigo}] {texto}"
+    return str(e)
+
+
 def main() -> None:
     args = sys.argv[1:]
     seguir = "--seguir" in args
@@ -78,7 +89,7 @@ def main() -> None:
                 mostrar(cursor)
             except pymssql.Error as e:
                 hubo_error = True
-                print(f"  ERROR en el lote {n}: {e}\n")
+                print(f"  ERROR en el lote {n}: {mensaje_legible(e)}\n")
                 if not seguir:
                     sys.exit(1)
 
