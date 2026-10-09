@@ -17,11 +17,17 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    DECLARE @inicio DATETIME2(0) = SYSDATETIME();
+    DECLARE @inicio DATETIME2(0) = SYSDATETIME(),
+            @paso   NVARCHAR(100);
 
     BEGIN TRY
+        SET @paso = N'usp_cargar_csv';
         EXEC dw.usp_cargar_csv @carpeta = @carpeta;
+
+        SET @paso = N'usp_transformar';
         EXEC dw.usp_transformar;
+
+        SET @paso = N'usp_refrescar_brecha';
         EXEC rpt.usp_refrescar_brecha;
 
         INSERT INTO dw.log_carga (proceso, inicio, fin, filas, estado, mensaje)
@@ -30,7 +36,7 @@ BEGIN
     BEGIN CATCH
         INSERT INTO dw.log_carga (proceso, inicio, fin, filas, estado, mensaje)
         VALUES (N'usp_pipeline', @inicio, SYSDATETIME(), NULL, N'ERROR',
-                CONCAT(N'Falló en el paso: ', ERROR_PROCEDURE(), N'. ', ERROR_MESSAGE()));
+                CONCAT(N'Falló en el paso ', @paso, N': ', ERROR_MESSAGE()));
         THROW;
     END CATCH
 

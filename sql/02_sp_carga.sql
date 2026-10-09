@@ -36,8 +36,15 @@ BEGIN
     -- Opciones comunes de BULK INSERT.
     -- ROWTERMINATOR 0x0a acepta archivos con fin de línea LF o CRLF;
     -- el CR sobrante se limpia después, en la transformación.
+    -- CODEPAGE (para leer UTF-8) solo existe en SQL Server sobre Windows;
+    -- en Linux no se admite, así que se agrega solo si corresponde.
+    DECLARE @es_windows BIT = CASE WHEN (SELECT host_platform FROM sys.dm_os_host_info) = N'Windows'
+                                   THEN 1 ELSE 0 END;
+
     SET @opciones = N' WITH (FORMAT = ''CSV'', FIRSTROW = 2, FIELDQUOTE = ''"'', '
-                  + N'ROWTERMINATOR = ''0x0a'', CODEPAGE = ''65001'', TABLOCK);';
+                  + N'ROWTERMINATOR = ''0x0a'', '
+                  + CASE WHEN @es_windows = 1 THEN N'CODEPAGE = ''65001'', ' ELSE N'' END
+                  + N'TABLOCK);';
 
     BEGIN TRY
         BEGIN TRANSACTION;
